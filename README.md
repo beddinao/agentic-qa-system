@@ -1,1 +1,1 @@
-# *`agentic-qa-system`*
+# *`agentic-QA-system`*
