@@ -6,5 +6,5 @@ pinecone
 langchain
 langchain-openai
 langchain-pinecone
-langchain_community
+langchain-huggingface
 sentence-transformers

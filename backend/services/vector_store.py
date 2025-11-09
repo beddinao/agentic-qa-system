@@ -1,7 +1,10 @@
 import os
-import pinecone
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from dotenv import load_dotenv
+from pinecone import Pinecone, ServerlessSpec
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_pinecone import PineconeVectorStore
+
+load_dotenv()
 
 class VectorStore:
     def __init__(self):
@@ -14,15 +17,22 @@ class VectorStore:
         self.index_name = os.getenv("PINECONE_INDEX_NAME")
         self._ensure_index_exists()
 
-        print("Pinecone Vector Store init success")
+        print("pinecone Vector Store init success")
 
     def _ensure_index_exists(self):
-        if self.index_name not in self.pinecone.list_indexes():
+        existing_indexes = self.pinecone.list_indexes()
+        existing_index_names = [index.name for index in existing_indexes]
+        if self.index_name not in existing_index_names:
             print("index not found creating new")
             self.pinecone.create_index(
                 name=self.index_name,
                 dimension=1536,
-                metric="cosine"
+                metric="cosine",
+                spec=ServerlessSpec(
+                    cloud="aws",
+                    region="us-east-1"
+                ),
+                deletion_protection="disabled"
             )
         print("index is there")
 
