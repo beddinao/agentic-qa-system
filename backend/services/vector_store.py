@@ -15,15 +15,17 @@ class VectorStore:
             api_key=os.getenv("PINECONE_API_KEY")
         )
         self.index_name = os.getenv("PINECONE_INDEX_NAME")
-        self._ensure_index_exists()
-
-        print("pinecone Vector Store init success")
+        try:
+            self._ensure_index_exists()
+        except Exception as e:
+            print("--- [PINECONE]: INIT FAILURE")
+        print("--- [PINECONE]: INIT SUCCESS")
 
     def _ensure_index_exists(self):
         existing_indexes = self.pinecone.list_indexes()
         existing_index_names = [index.name for index in existing_indexes]
         if self.index_name not in existing_index_names:
-            print("index not found creating new")
+            print("--- [PINECONE]: creating new index")
             self.pinecone.create_index(
                 name=self.index_name,
                 dimension=1536,
@@ -34,7 +36,6 @@ class VectorStore:
                 ),
                 deletion_protection="disabled"
             )
-        print("index is there")
 
     def get_vector_store(self):
         return PineconeVectorStore.from_existing_index(
