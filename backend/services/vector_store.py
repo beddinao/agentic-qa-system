@@ -1,13 +1,12 @@
 import os
 import pinecone
-from langchain_openai import OpenAIEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_pinecone import PineconeVectorStore
 
 class VectorStore:
     def __init__(self):
-        self.embeddings = OpenAIEmbeddings(
-            model="text-embedding-ada-002",
-            openai_api_key=os.getenv("OPENROUTER_API_KEY")
+        self.embeddings = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2"
         )
         self.pinecone = Pinecone(
             api_key=os.getenv("PINECONE_API_KEY")
