@@ -7,6 +7,6 @@ COPY . /frontend
 
 WORKDIR /frontend
 
-RUN npm install && npm install react axios
+#RUN npm install && npm install react axios
 
-CMD ["npm", "run", "dev"]
+CMD ["tail", "-f", "/dev/null"]

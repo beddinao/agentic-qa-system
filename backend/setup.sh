@@ -17,4 +17,4 @@ else
 	source venv/bin/activate
 fi
 
-python3 /backend/services/vector_store.py 
+python3 main.py 
