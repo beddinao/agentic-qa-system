@@ -1,6 +1,6 @@
 from langchain.agents import create_agent
 from langchain_core.prompts import ChatPromptTemplate
-from services.openrouter_client import create_openrouter_llm
+from services.openrouter_client import create_openrouter_llm, test_openrouter_configurations
 from services.vector_store import vector_store
 from langchain.tools import tool
 from dotenv import load_dotenv
@@ -31,16 +31,20 @@ class QAAgent:
             vector_store_instance = vector_store.get_vector_store()
             docs = vector_store_instance.similarity_search(query, k=3)
 
-            results = []
-            for doc in docs:
+            citations = []
+            context = ""
+            for i, doc in enumerate(docs):
                 print(f"--- [BOT][{self._get_current_time()}]: found document from: {doc.metadata.get('source', 'unknown')}")
-                results.append({
-                    "content": doc.page_content,
-                    "source": doc.metadata.get("source", "unknown"),
-                    "chunk_index": doc.metadata.get("chunk_index", 0)
+                source = docs.metadata.get("source", "unknown")
+                content = docs.page_content
+                context += f"\n\nSource {i+1 ({source}):\n{content}}"
+                citations.append({
+                    "source": source,
+                    "content": content[:200] + "...",
+                    "confidence": 0.95
                 })
 
-            return json.dumps(results)
+            return context, citations 
         return [document_search]
 
     def _create_agent(self):
@@ -81,6 +85,9 @@ class QAAgent:
         })
 
         try:
+            
+            test_openrouter_configurations();
+
             result = self.agent.invoke({
                 "messages": messages
             })

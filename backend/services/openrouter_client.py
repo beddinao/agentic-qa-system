@@ -1,5 +1,6 @@
 import os
 from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage
 from configs.openrouter import OpenRouterConfig
 
 
@@ -16,9 +17,11 @@ def create_openrouter_llm():
 def test_openrouter_configurations():
     print("--- [OPENROUTER]: testing connection..")
     try:
+        messages = [HumanMessage(content="responde like a human would do. are you alive?")]
         llm = create_openrouter_llm()
-        response = llm.invoke("responde like a human. are you alive?")
-        print(f"--- [OPENROUTER]: {response.content}")
+        response = llm.stream(messages)
+        for chunk in response:
+            print(chunk.content, end="", flush=True)
         return True
     except Exception as e:
         print(f"--- [OPENROUTER]: missconfigured: {str(e)}")
