@@ -26,7 +26,7 @@ class QAAgent:
 
             results = []
             for doc in docs:
-                print(f"--- [BOT]: found document: {doc.page_content}")
+                print(f"--- [BOT]: found document from: {doc.metadata.get('source', 'unknown')}")
                 results.append({
                     "content": doc.page_content,
                     "source": doc.metadata.get("source", "unknown"),
