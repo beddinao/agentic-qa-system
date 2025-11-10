@@ -36,7 +36,7 @@ class IngestionService:
 
         self._considering_nextjs_docs = (self._nextjs_docs_domain is not None
                 and self._nextjs_sitemap_url is not None and self._nextjs_max_pages != 0)
-        self._considering_langchain_docs = (self.langchain_docs_domain is not None
+        self._considering_langchain_docs = (self._langchain_docs_domain is not None
                 and self._langchain_sitemap_url is not None and self._langchain_max_pages != 0)
         self._considering_stripe_docs = (self._stripe_docs_domain is not None
                 and self._stripe_sitemap_url is not None and self._stripe_max_pages != 0)
@@ -55,14 +55,34 @@ class IngestionService:
         except Exception:
             return False
 
-    def _get_pages_of_intrest(self, sitemap_url: str, max_pages):
+    def _is_a_doc_page(self, source_url: str, url: str) -> bool:
+        if not self._is_urls_in_same_domain(source_url, url):
+            return False
+
+        try:
+            source_path = urlparse(source_url).path
+            c_path = urlparse(url).path
+        
+            if '/docs' in source_path and '/docs' not in c_path:
+                return False
+
+            return True
+        except Exception:
+            return False
+
+
+    def _get_pages_of_intrest(self, source_url: str, sitemap_url: str, max_pages):
         response = requests.get(sitemap_url)
         soup = BeautifulSoup(response.content, 'xml')
         
         pages_of_intrest = []
         items = soup.find_all('loc')
-        for item in items[:max_pages]:
-            pages_of_intrest.append(item.get_text())
+        for item in items:
+            url = item.get_text()
+            if self._is_a_doc_page(source_url, url)
+                pages_of_intrest.append(item.get_text())
+                if len(pages_of_intrest) >= max_pages:
+                    break
 
         return pages_of_intrest
 
@@ -97,11 +117,11 @@ class IngestionService:
             try:
                 new_pages = []
                 if self._considering_nextjs_docs and self._is_urls_in_same_domain(source_url, self._nextjs_docs_domain):
-                    new_pages = self._get_pages_of_intrest(self._nextjs_sitemap_url, self._nextjs_max_pages)
+                    new_pages = self._get_pages_of_intrest(self._nextjs_docs_domain, self._nextjs_sitemap_url, self._nextjs_max_pages)
                 elif self._considering_langchain_docs and self._is_urls_in_same_domain(source_url, self._langchain_docs_domain):
-                    new_pages = self._get_pages_of_intrest(self._langchain_sitemap_url, self._langchain_max_pages)
+                    new_pages = self._get_pages_of_intrest(self._langchain_docs_domain, self._langchain_sitemap_url, self._langchain_max_pages)
                 elif self._considering_stripe_docs and self._is_urls_in_same_domain(source_url, self._stripe_docs_domain):
-                    new_pages = self._get_pages_of_intrest(self._stripe_sitemap_url, self._stripe_max_pages)
+                    new_pages = self._get_pages_of_intrest(self._stripe_docs_domain, self._stripe_sitemap_url, self._stripe_max_pages)
                 urls.extend(new_pages)
             except:
                 pass
