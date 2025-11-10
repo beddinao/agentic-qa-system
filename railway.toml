@@ -1,2 +1,6 @@
-[service]
-sourcePath = "backend"
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "./backend/Dockerfile"
+
+[deploy]
+healthCheckPath = "/health"
